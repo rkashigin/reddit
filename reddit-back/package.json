@@ -11,10 +11,23 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "dependencies": {
+        "@mikro-orm/cli": "^4.5.7",
+        "@mikro-orm/core": "^4.5.7",
+        "@mikro-orm/migrations": "^4.5.7",
+        "@mikro-orm/postgresql": "^4.5.7",
+        "pg": "^8.6.0"
+    },
     "devDependencies": {
         "@types/node": "^16.4.2",
         "nodemon": "^2.0.12",
-        "ts-node": "^10.1.0",
         "typescript": "^4.3.5"
+    },
+    "mikro-orm": {
+        "useTsNode": true,
+        "configPaths": [
+            "./src/mikro-orm.config.ts",
+            "./dist/mikro-orm.config.js"
+        ]
     }
 }
