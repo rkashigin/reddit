@@ -31,7 +31,7 @@ const main = async () => {
         secret: 'qiwejalsdlkj1203912ojzxcjlwd',
         resave: false,
         saveUninitialized: false,
-        name: 'qid',
+        name: constants_1.COOKIE_NAME,
         store: new RedisStore({
             client: redisClient,
             disableTouch: true,
