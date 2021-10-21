@@ -70,8 +70,8 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "username",
-                        message: "Username length must be greater than 2",
+                        field: 'username',
+                        message: 'Username length must be greater than 2',
                     },
                 ],
             };
@@ -80,32 +80,39 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "password",
-                        message: "Password length must be greater than 2",
+                        field: 'password',
+                        message: 'Password length must be greater than 2',
                     },
                 ],
             };
         }
         const hashedPassword = await argon2_1.default.hash(options.password);
-        const user = em.create(User_1.User, {
-            username: options.username,
-            password: hashedPassword,
-        });
+        let user;
         try {
-            await em.persistAndFlush(user);
+            const result = await em
+                .createQueryBuilder(User_1.User)
+                .getKnexQuery()
+                .insert({
+                username: options.username,
+                password: hashedPassword,
+                created_at: new Date(),
+                updated_at: new Date(),
+            })
+                .returning('*');
+            user = result[0];
         }
         catch (err) {
-            if (err.code === "23505" || err.detail.includes("already exists")) {
+            if (err.detail.includes('already exists')) {
                 return {
                     errors: [
                         {
-                            field: "username",
-                            message: "username already taken",
+                            field: 'username',
+                            message: 'username already taken',
                         },
                     ],
                 };
             }
-            console.log("message: ", err.message);
+            console.log('message: ', err.message);
         }
         req.session.userId = user.id;
         return { user };
@@ -116,7 +123,7 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "username",
+                        field: 'username',
                         message: "That username doesn't exist",
                     },
                 ],
@@ -127,8 +134,8 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: "password",
-                        message: "Password is incorrect",
+                        field: 'password',
+                        message: 'Password is incorrect',
                     },
                 ],
             };
@@ -146,7 +153,7 @@ __decorate([
 ], UserResolver.prototype, "me", null);
 __decorate([
     type_graphql_1.Mutation(() => UserResponse),
-    __param(0, type_graphql_1.Arg("options")),
+    __param(0, type_graphql_1.Arg('options')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [UsernamePasswordInput, Object]),
@@ -154,7 +161,7 @@ __decorate([
 ], UserResolver.prototype, "register", null);
 __decorate([
     type_graphql_1.Mutation(() => UserResponse),
-    __param(0, type_graphql_1.Arg("options")),
+    __param(0, type_graphql_1.Arg('options')),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [UsernamePasswordInput, Object]),
