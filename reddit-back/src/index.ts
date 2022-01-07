@@ -27,7 +27,7 @@ const main = async () => {
     cors({
       origin: 'http://localhost:3000',
       credentials: true,
-    })
+    }),
   );
 
   app.use(
@@ -46,7 +46,7 @@ const main = async () => {
         sameSite: 'lax', // csrf
         secure: __prod__, // cookie only works in https
       },
-    })
+    }),
   );
 
   const apolloServer = new ApolloServer({
