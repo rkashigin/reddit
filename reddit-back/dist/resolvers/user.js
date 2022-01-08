@@ -20,8 +20,10 @@ const constants_1 = require("../constants");
 const type_graphql_1 = require("type-graphql");
 const User_1 = require("../entities/User");
 const argon2_1 = __importDefault(require("argon2"));
+const uuid_1 = require("uuid");
 const UsernamePasswordInput_1 = require("./UsernamePasswordInput");
 const validateRegister_1 = require("../utils/validateRegister");
+const sendEmail_1 = require("../utils/sendEmail");
 let FieldError = class FieldError {
 };
 __decorate([
@@ -49,9 +51,15 @@ UserResponse = __decorate([
     type_graphql_1.ObjectType()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async forgotPassword(email, { em }) {
+    async forgotPassword(email, { em, redis }) {
         const user = await em.findOne(User_1.User, { email });
-        console.log(user);
+        if (!user) {
+            return true;
+        }
+        const token = uuid_1.v4();
+        await redis.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, 'ex', 1000 * 60 * 60 * 24 * 3);
+        await sendEmail_1.sendEmail(email, `<a href="http://localhost:3000/change-password/${token}">Reset password</a>`);
+        return true;
     }
     async me({ em, req }) {
         if (!req.session.userId) {
@@ -104,7 +112,7 @@ let UserResolver = class UserResolver {
             return {
                 errors: [
                     {
-                        field: 'username',
+                        field: 'usernameOrEmail',
                         message: "That username doesn't exist",
                     },
                 ],
