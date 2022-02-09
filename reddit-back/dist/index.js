@@ -19,7 +19,7 @@ const typeorm_1 = require("typeorm");
 const User_1 = require("./entities/User");
 const Post_1 = require("./entities/Post");
 const main = async () => {
-    const connection = await typeorm_1.createConnection({
+    await typeorm_1.createConnection({
         type: 'postgres',
         database: 'reddit',
         logging: true,
