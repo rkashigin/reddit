@@ -6,8 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const post_1 = require("./resolvers/post");
 const express_1 = __importDefault(require("express"));
-const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
-const core_1 = require("@mikro-orm/core");
 const apollo_server_express_1 = require("apollo-server-express");
 const apollo_server_core_1 = require("apollo-server-core");
 const type_graphql_1 = require("type-graphql");
@@ -17,9 +15,17 @@ const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const constants_1 = require("./constants");
 const cors_1 = __importDefault(require("cors"));
+const typeorm_1 = require("typeorm");
+const User_1 = require("./entities/User");
+const Post_1 = require("./entities/Post");
 const main = async () => {
-    const orm = await core_1.MikroORM.init(mikro_orm_config_1.default);
-    await orm.getMigrator().up();
+    const connection = await typeorm_1.createConnection({
+        type: 'postgres',
+        database: 'reddit',
+        logging: true,
+        synchronize: true,
+        entities: [User_1.User, Post_1.Post],
+    });
     const app = express_1.default();
     const RedisStore = connect_redis_1.default(express_session_1.default);
     const redis = new ioredis_1.default();
@@ -49,7 +55,7 @@ const main = async () => {
             validate: false,
         }),
         plugins: [apollo_server_core_1.ApolloServerPluginLandingPageGraphQLPlayground()],
-        context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
+        context: ({ req, res }) => ({ req, res, redis }),
     });
     await apolloServer.start();
     apolloServer.applyMiddleware({ app, cors: false });
