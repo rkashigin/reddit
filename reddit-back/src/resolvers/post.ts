@@ -7,6 +7,7 @@ import {
   Field,
   Ctx,
   UseMiddleware,
+  Int,
 } from 'type-graphql';
 import { Post } from '../entities/Post';
 import { MyContext } from '../types';
@@ -26,7 +27,7 @@ class PostInput {
 export class PostResolver {
   @Query(() => [Post])
   async posts(
-    @Arg('limit') limit: number,
+    @Arg('limit', () => Int) limit: number,
     @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
   ): Promise<Post[]> {
     const realLimit = Math.min(50, limit);
@@ -38,7 +39,7 @@ export class PostResolver {
       .take(realLimit);
 
     if (cursor) {
-      qb.where('"createdAt" < :cursor', { cursor: parseInt(cursor) });
+      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
     }
 
     return qb.getMany();

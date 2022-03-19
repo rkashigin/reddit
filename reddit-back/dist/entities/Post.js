@@ -56,7 +56,7 @@ __decorate([
 ], Post.prototype, "updatedAt", void 0);
 Post = __decorate([
     type_graphql_1.ObjectType(),
-    typeorm_1.Entity()
+    typeorm_1.Entity({ name: 'posts' })
 ], Post);
 exports.Post = Post;
 //# sourceMappingURL=Post.js.map

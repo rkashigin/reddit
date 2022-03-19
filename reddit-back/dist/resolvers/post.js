@@ -39,7 +39,7 @@ let PostResolver = class PostResolver {
             .addOrderBy('"createdAt"', 'DESC')
             .take(realLimit);
         if (cursor) {
-            qb.where('"createdAt" < :cursor', { cursor: parseInt(cursor) });
+            qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
         }
         return qb.getMany();
     }
@@ -68,7 +68,7 @@ let PostResolver = class PostResolver {
 };
 __decorate([
     type_graphql_1.Query(() => [Post_1.Post]),
-    __param(0, type_graphql_1.Arg('limit')),
+    __param(0, type_graphql_1.Arg('limit', () => type_graphql_1.Int)),
     __param(1, type_graphql_1.Arg('cursor', () => String, { nullable: true })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
