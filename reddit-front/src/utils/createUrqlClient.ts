@@ -1,7 +1,7 @@
 import { dedupExchange, fetchExchange } from '@urql/core';
-import { cacheExchange } from '@urql/exchange-graphcache';
+import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
 import { pipe, tap } from 'wonka';
-import { Exchange } from 'urql';
+import { Exchange, stringifyVariables } from 'urql';
 import {
   LogoutMutation,
   MeQuery,
@@ -16,13 +16,36 @@ const errorExchange: Exchange = ({ forward }) => (ops$) => {
   return pipe(
     forward(ops$),
     tap(({ error }) => {
-      console.log('EROROROROR');
       if (error?.message.includes('Not authenticated')) {
-        console.log('asjdadkjakjdlka EEEROROROROROR');
         Router.replace('/login');
       }
     }),
   );
+};
+
+export const cursorPagination = (): Resolver => {
+  return (_parent, fieldArgs, cache, info) => {
+    const { parentKey: entityKey, fieldName } = info;
+
+    const allFields = cache.inspectFields(entityKey);
+    const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
+    const size = fieldInfos.length;
+    if (size === 0) {
+      return undefined;
+    }
+
+    const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
+    const isItInTheCache = cache.resolve(entityKey, fieldKey);
+    info.partial = !isItInTheCache;
+    const results: string[] = [];
+    fieldInfos.forEach((fi) => {
+      const data = cache.resolve(entityKey, fi.fieldKey) as string[];
+
+      results.push(...data);
+    });
+
+    return results;
+  };
 };
 
 export const createUrqlClient = (ssrExchange: any) => ({
@@ -33,6 +56,11 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
       updates: {
         Mutation: {
           logout: (_result, args, cache, info) => {

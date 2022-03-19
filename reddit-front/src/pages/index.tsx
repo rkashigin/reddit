@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { withUrqlClient } from 'next-urql';
 import {
   Box,
@@ -15,10 +16,12 @@ import { createUrqlClient } from '../utils/createUrqlClient';
 import { Layout } from '../components/Layout';
 
 const Index = () => {
+  const [variables, setVariables] = useState({
+    limit: 10,
+    cursor: null as null | string,
+  });
   const [{ data, fetching }] = usePostsQuery({
-    variables: {
-      limit: 10,
-    },
+    variables,
   });
 
   if (!fetching && !data) {
@@ -48,7 +51,17 @@ const Index = () => {
       )}
       {data && (
         <Flex>
-          <Button m="auto" my={8} isLoading={fetching}>
+          <Button
+            m="auto"
+            my={8}
+            isLoading={fetching}
+            onClick={() =>
+              setVariables({
+                limit: variables.limit,
+                cursor: data.posts[data.posts.length - 1].createdAt,
+              })
+            }
+          >
             Load more
           </Button>
         </Flex>
