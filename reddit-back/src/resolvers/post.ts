@@ -11,6 +11,7 @@ import {
 import { Post } from '../entities/Post';
 import { MyContext } from '../types';
 import { isAuth } from '../middlewares';
+import { getConnection } from 'typeorm';
 
 @InputType()
 class PostInput {
@@ -24,8 +25,23 @@ class PostInput {
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    return Post.find();
+  async posts(
+    @Arg('limit') limit: number,
+    @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+
+    const qb = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder('p')
+      .addOrderBy('"createdAt"', 'DESC')
+      .take(realLimit);
+
+    if (cursor) {
+      qb.where('"createdAt" < :cursor', { cursor: parseInt(cursor) });
+    }
+
+    return qb.getMany();
   }
 
   @Query(() => Post, { nullable: true })
