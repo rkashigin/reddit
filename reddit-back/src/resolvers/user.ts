@@ -1,21 +1,24 @@
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
 import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from 'type-graphql';
-import { MyContext } from '../types';
-import { User } from '../entities/User';
 import argon2 from 'argon2';
 import { v4 } from 'uuid';
+import { getConnection } from 'typeorm';
+
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { MyContext } from '../types';
+import { User } from '../entities/User';
 import { UsernamePasswordInput } from './UsernamePasswordInput';
 import { validateRegister } from '../utils/validateRegister';
 import { sendEmail } from '../utils/sendEmail';
-import { getConnection } from 'typeorm';
 
 @ObjectType()
 class FieldError {
@@ -35,8 +38,17 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+
+    return '';
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg('token') token: string,

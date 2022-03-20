@@ -50,15 +50,26 @@ let PostResolver = class PostResolver {
     async posts(limit, cursor) {
         const realLimit = Math.min(50, limit);
         const realLimitPlusOne = realLimit + 1;
-        const qb = typeorm_1.getConnection()
-            .getRepository(Post_1.Post)
-            .createQueryBuilder('p')
-            .addOrderBy('"createdAt"', 'DESC')
-            .take(realLimitPlusOne);
+        const replacements = [realLimitPlusOne];
         if (cursor) {
-            qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+            replacements.push(cursor);
         }
-        const posts = await qb.getMany();
+        const posts = await typeorm_1.getConnection().query(`
+      SELECT p.*,
+      JSON_BUILD_OBJECT(
+        'id', u.id,
+        'email', u.email,
+        'username', u.username,
+        'createdAt', u."createdAt",
+        'updatedAt', u."updatedAt"
+      ) creator
+      FROM posts p
+      INNER JOIN users u ON u.id = p."creatorId"
+      ${cursor ? ` WHERE p."createdAt" < $2` : ''}
+      ORDER BY p."createdAt" DESC
+      LIMIT $1
+    `, replacements);
+        console.log('posts:', posts);
         return {
             posts: posts.slice(0, realLimit),
             hasMore: posts.length === realLimitPlusOne,

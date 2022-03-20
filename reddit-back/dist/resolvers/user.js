@@ -16,15 +16,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
-const constants_1 = require("../constants");
 const type_graphql_1 = require("type-graphql");
-const User_1 = require("../entities/User");
 const argon2_1 = __importDefault(require("argon2"));
 const uuid_1 = require("uuid");
+const typeorm_1 = require("typeorm");
+const constants_1 = require("../constants");
+const User_1 = require("../entities/User");
 const UsernamePasswordInput_1 = require("./UsernamePasswordInput");
 const validateRegister_1 = require("../utils/validateRegister");
 const sendEmail_1 = require("../utils/sendEmail");
-const typeorm_1 = require("typeorm");
 let FieldError = class FieldError {
 };
 __decorate([
@@ -52,6 +52,12 @@ UserResponse = __decorate([
     type_graphql_1.ObjectType()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    email(user, { req }) {
+        if (req.session.userId === user.id) {
+            return user.email;
+        }
+        return '';
+    }
     async changePassword(token, newPassword, { redis, req }) {
         if (newPassword.length <= 2) {
             return {
@@ -186,6 +192,14 @@ let UserResolver = class UserResolver {
     }
 };
 __decorate([
+    type_graphql_1.FieldResolver(() => String),
+    __param(0, type_graphql_1.Root()),
+    __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [User_1.User, Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "email", null);
+__decorate([
     type_graphql_1.Mutation(() => UserResponse),
     __param(0, type_graphql_1.Arg('token')),
     __param(1, type_graphql_1.Arg('newPassword')),
@@ -234,7 +248,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserResolver.prototype, "logout", null);
 UserResolver = __decorate([
-    type_graphql_1.Resolver()
+    type_graphql_1.Resolver(User_1.User)
 ], UserResolver);
 exports.UserResolver = UserResolver;
 //# sourceMappingURL=user.js.map
