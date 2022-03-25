@@ -16,7 +16,6 @@ import { Post } from '../entities/Post';
 import { MyContext } from '../types';
 import { isAuth } from '../middlewares';
 import { getConnection } from 'typeorm';
-import { Updoot } from '../entities/Updoot';
 
 @InputType()
 class PostInput {
@@ -102,8 +101,8 @@ export class PostResolver {
       ) creator
       FROM posts p
       INNER JOIN users u ON u.id = p."creatorId"
-      ${cursor ? ` WHERE p."createdAt" < $2` : ''}
-      ORDER BY p."createdAt" DESC
+      ${cursor ? ` WHERE p.id < $2` : ''}
+      ORDER BY p.id DESC
       LIMIT $1
     `,
       replacements,

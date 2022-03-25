@@ -83,8 +83,8 @@ let PostResolver = class PostResolver {
       ) creator
       FROM posts p
       INNER JOIN users u ON u.id = p."creatorId"
-      ${cursor ? ` WHERE p."createdAt" < $2` : ''}
-      ORDER BY p."createdAt" DESC
+      ${cursor ? ` WHERE p.id < $2` : ''}
+      ORDER BY p.id DESC
       LIMIT $1
     `, replacements);
         console.log('posts:', posts);
