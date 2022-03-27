@@ -64,7 +64,7 @@ const Index = () => {
               setVariables({
                 limit: variables.limit,
                 cursor: String(
-                  data.posts.posts[data.posts.posts.length - 1].id,
+                  data.posts.posts[data.posts.posts.length - 1].createdAt,
                 ),
               })
             }

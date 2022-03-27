@@ -117,8 +117,10 @@ export class PostResolver {
       replacements.push(req.session.userId);
     }
 
+    let cursorIdx = 2;
     if (cursor) {
-      replacements.push(cursor);
+      replacements.push(new Date(parseInt(cursor)));
+      cursorIdx = replacements.length;
     }
 
     const posts = await getConnection().query(
@@ -138,7 +140,7 @@ export class PostResolver {
       }
       FROM posts p
       INNER JOIN users u ON u.id = p."creatorId"
-      ${cursor ? ` WHERE p.id < $3` : ''}
+      ${cursor ? ` WHERE p."createdAt" < $${cursorIdx}` : ''}
       ORDER BY p.id DESC
       LIMIT $1
     `,

@@ -89,8 +89,10 @@ let PostResolver = class PostResolver {
         if (req.session.userId) {
             replacements.push(req.session.userId);
         }
+        let cursorIdx = 2;
         if (cursor) {
-            replacements.push(cursor);
+            replacements.push(new Date(parseInt(cursor)));
+            cursorIdx = replacements.length;
         }
         const posts = await typeorm_1.getConnection().query(`
       SELECT p.*,
@@ -106,7 +108,7 @@ let PostResolver = class PostResolver {
             : 'null as "voteStatus"'}
       FROM posts p
       INNER JOIN users u ON u.id = p."creatorId"
-      ${cursor ? ` WHERE p.id < $3` : ''}
+      ${cursor ? ` WHERE p."createdAt" < $${cursorIdx}` : ''}
       ORDER BY p.id DESC
       LIMIT $1
     `, replacements);
