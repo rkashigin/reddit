@@ -21,7 +21,10 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
         w={6}
         h={6}
         isLoading={loadingState === 'updoot-loading'}
+        colorScheme={post.voteStatus === 1 ? 'green' : undefined}
         onClick={async () => {
+          if (post.voteStatus === 1) return;
+
           setLoadingState('updoot-loading');
           await vote({ postId: post.id, value: 1 });
           setLoadingState('not-loading');
@@ -34,7 +37,10 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
         w={6}
         h={6}
         isLoading={loadingState === 'downdoot-loading'}
+        colorScheme={post.voteStatus === -1 ? 'red' : undefined}
         onClick={async () => {
+          if (post.voteStatus === -1) return;
+
           setLoadingState('downdoot-loading');
           await vote({ postId: post.id, value: -1 });
           setLoadingState('not-loading');
