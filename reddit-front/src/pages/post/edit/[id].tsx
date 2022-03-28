@@ -40,7 +40,7 @@ const EditPost = ({}) => {
             id: Number(data?.post?.id),
             ...values,
           });
-          router.push('/');
+          router.back();
         }}
       >
         {({ isSubmitting }) => (
