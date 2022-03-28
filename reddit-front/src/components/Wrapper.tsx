@@ -9,7 +9,7 @@ interface WrapperProps {
 
 const Wrapper: React.FC<WrapperProps> = ({ children, variant }) => {
   return (
-    <Box mt={8} mx="auto" w="100%" maxW={variant === 'regular' ? '80%' : '60%'}>
+    <Box mt={8} mx="auto" w="100%" maxW={variant === 'regular' ? '80%' : '30%'}>
       {children}
     </Box>
   );

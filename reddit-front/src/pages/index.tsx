@@ -11,9 +11,13 @@ import {
   Text,
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { DeleteIcon } from '@chakra-ui/icons';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 
-import { useDeletePostMutation, usePostsQuery } from '../generated/graphql';
+import {
+  useDeletePostMutation,
+  useMeQuery,
+  usePostsQuery,
+} from '../generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClient';
 import { Layout } from '../components/Layout';
 import { UpdootSection } from '../components/UpdootSection';
@@ -23,6 +27,7 @@ const Index = () => {
     limit: 10,
     cursor: null as null | string,
   });
+  const [{ data: meData }] = useMeQuery();
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
@@ -33,7 +38,7 @@ const Index = () => {
   }
 
   return (
-    <Layout>
+    <Layout variant="regular">
       {!data && fetching ? (
         <div>loading...</div>
       ) : (
@@ -53,16 +58,30 @@ const Index = () => {
                     <Text flex={1} mt={4}>
                       {p.textSnippet}...
                     </Text>
-                    <IconButton
-                      icon={<DeleteIcon w={5} h={5} />}
-                      aria-label="Delete Post"
-                      ml="auto"
-                      colorScheme="red"
-                      size="sm"
-                      onClick={async () => {
-                        await deletePost({ id: p.id });
-                      }}
-                    />
+                    {meData?.me?.id === p?.creator?.id && (
+                      <Box ml="auto">
+                        <NextLink
+                          href="/post/edit/[id]"
+                          as={`/post/edit/${p.id}`}
+                        >
+                          <IconButton
+                            as={Link}
+                            icon={<EditIcon w={5} h={5} />}
+                            aria-label="Edit Post"
+                            size="sm"
+                            mr={2}
+                          />
+                        </NextLink>
+                        <IconButton
+                          icon={<DeleteIcon w={5} h={5} />}
+                          aria-label="Delete Post"
+                          size="sm"
+                          onClick={async () => {
+                            await deletePost({ id: p.id });
+                          }}
+                        />
+                      </Box>
+                    )}
                   </Flex>
                 </Box>
               </Flex>
